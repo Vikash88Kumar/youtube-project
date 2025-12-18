@@ -3,10 +3,17 @@ import cors from "cors"
 import cookieParser from "cookie-parser";
 
 const app=express();
+const allowedOrigin = process.env.CORS_ORIGIN;
+
 app.use(cors({
-    origin: "https://youtube-project-1-5m0w.onrender.com",
-    credentials:true  //not known
-}))
+  origin: allowedOrigin,
+  credentials: true,
+}));
+
+app.options("*", cors({
+  origin: allowedOrigin,
+  credentials: true,
+}));
 app.use(express.json({limit:"16kb"}))
 app.use(express.urlencoded({extended:true,limit:"16kb"}))
 app.use(express.static("public"))
