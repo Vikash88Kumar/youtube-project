@@ -18,7 +18,7 @@ const startServer = async () => {
 
   const io = new Server(server, {
     cors: {
-      origin: process.env.CORS_ORIGIN,
+      origin: "https://youtube-project-1-5m0w.onrender.com",
       credentials: true
     }
   });
