@@ -81,7 +81,7 @@ export default function Messages() {
   useEffect(() => {
     if (!currentUser?._id) return;
 
-    socketRef.current = io("http://localhost:5000", {
+    socketRef.current = io(import.meta.env.VITE_API_URL, {
       auth: { token: localStorage.getItem("accessToken") },
       transports: ["websocket"],
     });
