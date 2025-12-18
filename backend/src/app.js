@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 
 const app=express();
 // const allowedOrigin = process.env.CORS_ORIGIN;
+app.set("trust proxy", 1);
 
 app.use(cors({
   origin: process.env.CORS_ORIGIN,

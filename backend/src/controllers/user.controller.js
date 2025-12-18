@@ -93,7 +93,8 @@
             const options={
                 httpOnly:true,
                 secure:true,
-                sameSite: "none"
+                sameSite: "none",
+                 path: "/",
             }
             res.status(200)
             .cookie("accessToken",accessToken,options)
