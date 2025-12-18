@@ -6,18 +6,10 @@ const app=express();
 // const allowedOrigin = process.env.CORS_ORIGIN;
 
 app.use(cors({
-  origin: function (origin, callback) {
-    // allow server-to-server, Postman, curl
-    if (!origin) return callback(null, true);
-
-    if (origin === process.env.CORS_ORIGIN) {
-      return callback(null, true);
-    } else {
-      return callback(new Error("Not allowed by CORS"));
-    }
-  },
+  origin: process.env.CORS_ORIGIN,
   credentials: true,
 }));
+
 
 
 

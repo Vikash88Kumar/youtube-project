@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
+  baseURL: "https://youtube-project-gkgf.onrender.com/api/v1",
   withCredentials: true,
 });
 
