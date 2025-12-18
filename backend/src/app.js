@@ -3,12 +3,22 @@ import cors from "cors"
 import cookieParser from "cookie-parser";
 
 const app=express();
-const allowedOrigin = process.env.CORS_ORIGIN;
+// const allowedOrigin = process.env.CORS_ORIGIN;
 
 app.use(cors({
-  origin: allowedOrigin,
+  origin: function (origin, callback) {
+    // allow server-to-server, Postman, curl
+    if (!origin) return callback(null, true);
+
+    if (origin === process.env.CORS_ORIGIN) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
 }));
+
 
 
 app.use(express.json({limit:"16kb"}))
