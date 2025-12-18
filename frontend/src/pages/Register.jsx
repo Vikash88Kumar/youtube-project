@@ -8,25 +8,52 @@ import { Label } from "../components/ui/label";
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: "",
-    username: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+  fullName: "",
+  username: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+  avatar: null,
+  coverImage: null,
+});
+
+  const [preview, setPreview] = useState({
+    avatar: null,
+    coverImage: null,
   });
 
-    const handleChange = (e) => {
-    setFormData({
-        ...formData,
-        [e.target.name]: e.target.value,
-    });
-    };
+
+const handleChange = (e) => {
+  const { name, value, files } = e.target;
+
+  if (files) {
+    const file = files[0];
+    setFormData({ ...formData, [name]: file });
+    setPreview({ ...preview, [name]: URL.createObjectURL(file) });
+  } else {
+    setFormData({ ...formData, [name]: value });
+  }
+};
 
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Register attempt:", formData);
-  };
+
+const handleSubmit = (e) => {
+  e.preventDefault();
+
+  const data = new FormData();
+  data.append("fullName", formData.fullName);
+  data.append("username", formData.username);
+  data.append("email", formData.email);
+  data.append("password", formData.password);
+  data.append("confirmPassword", formData.confirmPassword);
+  data.append("avatar", formData.avatar);
+  if (formData.coverImage) {
+    data.append("coverImage", formData.coverImage);
+  }
+
+  console.log("Register payload:", Object.fromEntries(data));
+};
+
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -39,7 +66,7 @@ const Register = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
+              <Label htmlFor="fullName">Full Name </Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -85,6 +112,41 @@ const Register = () => {
                 />
               </div>
             </div>
+            <div className="space-y-2">
+  <Label htmlFor="avatar">Avatar</Label>
+  <Input
+    id="avatar"
+    name="avatar"
+    type="file"
+    accept="image/*"
+    onChange={handleChange}
+  />
+  {preview.avatar && (
+    <img
+      src={preview.avatar}
+      alt="Avatar Preview"
+      className="mt-2 h-20 w-20 rounded-full object-cover border"
+    />
+  )}
+</div>
+<div className="space-y-2">
+  <Label htmlFor="coverImage">Cover Image</Label>
+  <Input
+    id="coverImage"
+    name="coverImage"
+    type="file"
+    accept="image/*"
+    onChange={handleChange}
+  />
+  {preview.coverImage && (
+    <img
+      src={preview.coverImage}
+      alt="Cover Preview"
+      className="mt-2 h-28 w-full rounded-lg object-cover border"
+    />
+  )}
+</div>
+
 
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
