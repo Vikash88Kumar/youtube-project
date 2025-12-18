@@ -92,7 +92,8 @@
 
             const options={
                 httpOnly:true,
-                secure:true
+                secure:true,
+                sameSite: "none"
             }
             res.status(200)
             .cookie("accessToken",accessToken,options)
@@ -114,7 +115,8 @@
                 )
                 const options={
                     httpOnly:true,              
-                    secure:true
+                    secure:true,
+                    sameSite: "none"
                 }
                 res.status(200)
                 .clearCookie("accessToken",options)
