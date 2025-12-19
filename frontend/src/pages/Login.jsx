@@ -22,7 +22,6 @@ const Login = () => {
     const loginRes = await LoginUser({ email, password });
     //  Fetch current user (uses cookie)
     const userRes = await getCurrentUser();
-    console.log(userRes)
     dispatch(login(userRes.data.data));
     alert(loginRes.data.message || "Logged in successfully");
     navigate("/");

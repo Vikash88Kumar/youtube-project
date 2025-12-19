@@ -76,7 +76,7 @@ function Navbar({ onMenuClick }) {
           </Button>
 
 
-          <Avatar onClick={() => navigate("/channel")} className="h-9 w-9 border-2 border-primary/50 cursor-pointer hover:border-primary transition-colors">
+          <Avatar onClick={() => navigate(`/channel/${currentUser?.username}`)} className="h-9 w-9 border-2 border-primary/50 cursor-pointer hover:border-primary transition-colors">
             <AvatarImage src={currentUser?.avatar} />
             <AvatarFallback className="bg-secondary">JD</AvatarFallback>
           </Avatar>

@@ -16,3 +16,15 @@ export const getUserPlaylists=async(userId)=>{
         console.log("get user palylist failed",error?.message)
     }
 }
+
+export const getPlaylistById = (playlistId) => {
+  return api.get(`/playlist/${playlistId}`);
+};
+
+export const addVideoToPlaylist = (videoId,name) => {
+  return api.patch(`/playlist/add/${videoId}/${name}`);
+};
+
+export const removeVideoFromPlaylist = (videoId,playlistId) => {
+  return api.patch(`/playlist/remove/${videoId}/${playlistId}`);
+};

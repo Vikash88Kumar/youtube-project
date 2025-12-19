@@ -30,12 +30,13 @@ import {
   SelectValue,
 } from "../components/ui/select";
 import { createPlaylist, getUserPlaylists } from "../services/playlists.api";
+import { useNavigate } from "react-router-dom";
 
 const Playlists = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("playlists");
   const [dialogOpen, setDialogOpen] = useState(false);
-
+  const navigate=useNavigate()
   const [playlists, setPlaylists] = useState([]);
   const [isCreating, setIsCreating] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -314,6 +315,7 @@ const Playlists = () => {
                         src={playlist.thumbnail}
                         alt={playlist.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        onClick={()=>navigate(`/playlist/${playlist._id}`)}
                       />
                       <div className="absolute bottom-2 right-2 bg-background/90 px-2 py-1 rounded text-xs">
                         {playlist?.videos?.length || 0} videos

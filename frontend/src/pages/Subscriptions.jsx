@@ -6,6 +6,7 @@ import { Users } from "lucide-react";
 import { useEffect } from "react";
 import {useSelector} from "react-redux"
 import { getSubscribedChannels } from "../services/subscriptions.api";
+import { useNavigate } from "react-router-dom";
 
 
 const subscriptionVideos = [
@@ -45,6 +46,9 @@ const Subscriptions = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("subscriptions");
   const [subscribedChannels,setsubscribedChannels]=useState([])
+  const navigate=useNavigate()
+
+
   const currentUser=useSelector((state)=>state.auth.userData)
   useEffect(()=>{
     if(!currentUser?._id) return;
@@ -79,9 +83,10 @@ const Subscriptions = () => {
                   <img 
                     src={channel.avatar} 
                     alt={channel.username}
-                    className="w-16 h-16 rounded-full border-2 border-primary"
+                    onClick={() => navigate(`/channel/${channel?.username}`)}
+                    className="w-16 h-16 cursor-pointer rounded-full border-2 border-primary"
                   />
-                  <span className="text-sm font-medium text-center">{channel.username}</span>
+                  <span className="text-sm font-medium text-center cursor-pointer hover:underline">{channel.username}</span>
                 </div>
               ))}
             </div>

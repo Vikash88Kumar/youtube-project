@@ -17,6 +17,7 @@ export const getSubscribedChannels=async(subscriberId)=>{
     }
 }
 
-export const getUserChannelSubscribers=async()=>{
-
+export const getUserChannelSubscribers=async(username)=>{
+    const res=await api.get(`/subscriptions/c/${username}`)
+    return res.data.data
 }

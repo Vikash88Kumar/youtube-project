@@ -43,19 +43,20 @@ const getAllTweete=asyncHandler(async (req,res)=>{
     return res.status(200).json(new ApiResponse(200,allTweets,"all tweets fetched successfully"))
 })
 const getUserTweets = asyncHandler(async (req, res) => {
-
+    const {username}=req.params
     // TODO: get user tweets
     const page = Math.max(1, parseInt(req.query.page || "1", 10)); //not clear
     const limit = Math.max(1, parseInt(req.query.limit || "10", 10));
     const skip = (page - 1) * limit;
 
-    if (!req.user || !req.user._id) {
+    if (!username) {
         throw new ApiError(401, "Unauthorized");
     }
+    const user=await User.findOne({username})
     const allTweets=await Tweet.aggregate([
         {
             $match:{
-                owner:new mongoose.Types.ObjectId(req?.user._id)
+                owner:new mongoose.Types.ObjectId(user?._id)
             }
         },
         { $sort: { createdAt: -1 } }, 

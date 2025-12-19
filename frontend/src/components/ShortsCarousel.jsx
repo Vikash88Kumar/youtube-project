@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 const shorts = [
   {
-    id: "1",
+    id: "693c5be4efc9e73403f662bd",
     thumbnail:
       "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=700&fit=crop",
     title: "Mind-blowing coding trick! 🤯",

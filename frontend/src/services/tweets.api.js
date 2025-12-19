@@ -12,8 +12,8 @@ export const getAllPosts=async ()=>{
     const response=await api.get("/tweets")
     return response.data
 }
-export const getUserTweets=async ()=>{
-    const response=await api.get("/tweets/channel/post")
+export const getUserTweets=async (username)=>{
+    const response=await api.get(`/tweets/${username}/post`)
     return response.data
 }
 

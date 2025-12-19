@@ -16,7 +16,7 @@ import { Button } from "./ui/button.jsx";
 import { cn } from "../lib/utils.js";
 import { getAllPosts,createTweet} from "../services/tweets.api.js";
 
-
+import PostCard from "./PostCard.jsx";
 
 
 
@@ -90,125 +90,6 @@ const initialPosts = [
   },
 ];
 
-/* -------------------- HELPERS -------------------- */
-
-function formatNumber(num) {
-  if (num >= 1_000_000) return (num / 1_000_000).toFixed(1) + "M";
-  if (num >= 1_000) return (num / 1_000).toFixed(1) + "K";
-  return num.toString();
-}
-
-/* -------------------- POST CARD -------------------- */
-
-function PostCard({ post }) {
-  const [liked, setLiked] = useState(post.liked || false);
-  const [retweeted, setRetweeted] = useState(post.retweeted || false);
-  const [likes, setLikes] = useState(post.likes);
-  const [retweets, setRetweets] = useState(post.retweets);
-
-  function handleLike() {
-    setLiked(!liked);
-    setLikes(liked ? likes - 1 : likes + 1);
-  }
-
-  function handleRetweet() {
-    setRetweeted(!retweeted);
-    setRetweets(retweeted ? retweets - 1 : retweets + 1);
-  }
-
-  return (
-    <div className="p-4 border-b border-border/50 hover:bg-secondary/30 transition-colors animate-fade-in">
-      <div className="flex gap-3">
-        <Avatar className="h-10 w-10">
-          <AvatarImage src={post.owner.avatar} />
-          <AvatarFallback className="bg-secondary">
-            {post.owner.fullName.slice(0, 2)}
-          </AvatarFallback>
-        </Avatar>
-
-        <div className="flex-1 min-w-0">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1 flex-wrap">
-              <span className="font-bold hover:underline cursor-pointer">
-                {post.owner.fullName}
-              </span>
-
-              {/* // */}
-              {true && (
-                <svg
-                  className="w-4 h-4 text-primary"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484z" />
-                </svg>
-              )}
-
-              <span className="text-muted-foreground text-sm">
-                @{post.owner.username}
-              </span>
-              <span className="text-muted-foreground">·</span>
-              <span className="text-muted-foreground text-sm">
-                {post?.createdAt.slice(0, 10)}
-              </span>
-            </div>
-
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Content */}
-          <p className="mt-1 whitespace-pre-wrap">{post.content}</p>
-
-          {/* Image */}
-          {post.image && (
-            <div className="mt-3 rounded-2xl overflow-hidden border">
-              <img src={post.image} alt="Post" />
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex items-center justify-between mt-3 max-w-md">
-            <button className="flex items-center gap-2 text-muted-foreground hover:text-primary">
-              <MessageCircle className="h-4 w-4" />
-              {/* <span>{formatNumber(post.comments)}</span> */}
-            </button>
-
-            <button
-              // onClick={handleRetweet}
-              className={cn(
-                "flex items-center gap-2",
-                retweeted ? "text-green-500" : "text-muted-foreground"
-              )}
-            >
-              <Repeat2 className="h-4 w-4" />
-              {/* <span>{formatNumber(retweets)}</span> */}
-            </button>
-
-            <button
-              // onClick={handleLike}
-              className={cn(
-                "flex items-center gap-2",
-                liked ? "text-pink-500" : "text-muted-foreground"
-              )}
-            >
-              <Heart className={cn("h-4 w-4", liked && "fill-current")} />
-              {/* <span>{formatNumber(likes)}</span> */}
-            </button>
-
-            <button className="text-muted-foreground hover:text-primary">
-              <Share className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* -------------------- FEED -------------------- */
 
 function PostsFeed({limit}) {
   const fileInputRef = useRef(null);
@@ -224,7 +105,7 @@ function PostsFeed({limit}) {
       setPosts(res.data)
     }
     fetchPosts()
-  },[posts])
+  },[])
 
   const handlePost=async()=>{
     try {

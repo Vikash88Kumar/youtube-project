@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import {
   Heart,
   MessageCircle,
@@ -10,37 +10,50 @@ import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "../components/ui/avatar";
 import { Button } from "../components/ui/button";
-
+import { getAllVideos } from "../services/video.api";
 /* -------------------- DATA -------------------- */
 
-const shortsData = [
-  {
-    id: "1",
-    video: "https://www.w3schools.com/html/mov_bbb.mp4",
-    title: "React tips you MUST know 🔥",
-    channel: "TechVision",
-    avatar:
-      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
-    likes: "12K",
-    comments: "420",
-  },
-  {
-    id: "2",
-    video: "https://www.w3schools.com/html/movie.mp4",
-    title: "Tailwind UI magic ✨",
-    channel: "Frontend Labs",
-    avatar:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100",
-    likes: "8.5K",
-    comments: "210",
-  },
-];
+// const shortsData = [
+//   {
+//     id: "1",
+//     video: "https://www.w3schools.com/html/mov_bbb.mp4",
+//     title: "React tips you MUST know 🔥",
+//     channel: "TechVision",
+//     avatar:
+//       "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+//     likes: "12K",
+//     comments: "420",
+//   },
+//   {
+//     id: "2",
+//     video: "https://www.w3schools.com/html/movie.mp4",
+//     title: "Tailwind UI magic ✨",
+//     channel: "Frontend Labs",
+//     avatar:
+//       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100",
+//     likes: "8.5K",
+//     comments: "210",
+//   },
+// ];
 
 /* -------------------- COMPONENT -------------------- */
 
 export default function Shorts() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
+  const [shortsData,setShortsData]=useState([])
+    useEffect(()=>{
+      const allVideos=async()=>{
+        try {
+          const res=await getAllVideos()
+          setShortsData(res.data.videos)
+          // console.log(res.data.videos)
+        } catch (error) {
+          console.log("All videos error",error?.message)
+        }
+      }
+      allVideos()
+    },[])
+console.log(shortsData)
   return (
     <div className="min-h-screen bg-background">
       <Navbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
@@ -54,13 +67,13 @@ export default function Shorts() {
           <div className="w-full max-w-[420px] bg-black h-[calc(100vh-4rem)] overflow-y-scroll snap-y snap-mandatory">
             {shortsData.map((short) => (
               <section
-                key={short.id}
+                key={short._id}
                 className="relative h-full snap-start flex items-center justify-center"
               >
                 {/* 9:16 CONTAINER */}
                 <div className="relative h-full aspect-[9/16]">
                   <video
-                    src={short.video}
+                    src={short.videoFile}
                     autoPlay
                     muted
                     loop
@@ -75,14 +88,14 @@ export default function Shorts() {
                   <div className="absolute bottom-6 left-4 text-white">
                     <div className="flex items-center gap-3 mb-2">
                       <Avatar className="cursor-pointer hover:scale-105 transition">
-                        <AvatarImage src={short.avatar} />
+                        <AvatarImage src={short.owner.avatar} />
                         <AvatarFallback>
-                          {short.channel[0]}
+                          {/* {short.channel[0]} */}
                         </AvatarFallback>
                       </Avatar>
 
                       <p className="font-semibold cursor-pointer hover:underline">
-                        {short.channel}
+                        {short.owner.username}
                       </p>
 
                       <Button
@@ -102,12 +115,12 @@ export default function Shorts() {
                   <div className="absolute bottom-24 right-4 flex flex-col items-center gap-5 text-white">
                     <div className="flex flex-col items-center gap-1 cursor-pointer hover:scale-110 transition">
                       <Heart className="h-7 w-7" />
-                      <span className="text-xs">{short.likes}</span>
+                      <span className="text-xs">{short.likes || 0}</span>
                     </div>
 
                     <div className="flex flex-col items-center gap-1 cursor-pointer hover:scale-110 transition">
                       <MessageCircle className="h-7 w-7" />
-                      <span className="text-xs">{short.comments}</span>
+                      <span className="text-xs">{ short.comments || 0}</span>
                     </div>
 
                     <div className="cursor-pointer hover:scale-110 transition">

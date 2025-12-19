@@ -1,68 +1,10 @@
-import mongoose, { Schema } from "mongoose"
+import mongoose, { Mongoose, Schema } from "mongoose"
 import {Comment} from "../models/comment.models.js"
 import {ApiError} from "../utils/apiError.js"
 import {ApiResponse} from "../utils/apiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
+import { Like } from "../models/like.models.js"
 
-// const getVideoComments = asyncHandler(async (req, res) => {
-//     //TODO: get all comments for a video
-//     const {videoId} = req.params
-//     const {page = 1, limit = 10} = req.query
-//     if (!mongoose.Types.ObjectId.isValid(videoId)) {
-//         throw new ApiError(400, "Invalid videoId");
-//     }
-//     const comment=await Comment.aggregate([
-//         {
-//             $match:{
-//                 video:new mongoose.Types.ObjectId(videoId)
-//             }
-//         },
-//         {
-//             $sort: { createdAt: -1 } ,  
-//         },
-//         {
-//             $lookup:{
-//                 from:"users",
-//                 localFields:"owner",
-//                 foreignFields:"_id",
-//                 as:"owner",
-//                 pipeline:[
-//                     {
-//                         $project:{
-//                             username:1,
-//                             avatar:1
-//                         }
-//                     }]
-//             }
-//         },
-//         { $addFields: { owner: { $first: "$owner" } } },
-//         {
-//             $project: {
-//                 content: 1,
-//                 createdAt: 1,
-//                 updatedAt: 1,
-//                 owner: 1,
-//             }
-//         }
-//         // {
-//         //     $facet: {
-//         //         metadata: [{ $count: "total" }],
-//         //         data: [{ $skip: skip }, { $limit: limit }]
-//         //     }
-//         // }
-//     ])
-//     return res.status(200).json(
-//         new ApiResponse(200,
-//             {
-//             comments:comment[0],
-//             pagination: {
-//                 page,
-//                 limit
-//             }},
-//         "All comments fetched successfully")
-//     )
-
-// })
 const getVideoComments = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
     let { page = 1, limit = 10 } = req.query;
@@ -77,44 +19,66 @@ const getVideoComments = asyncHandler(async (req, res) => {
 
     const comments = await Comment.aggregate([
         {
-            $match: {
-                video: new mongoose.Types.ObjectId(videoId),
-            }
+        $match: {
+            video: new mongoose.Types.ObjectId(videoId),
         },
-        {
-            $sort: { createdAt: -1 }
         },
+        { $sort: { createdAt: -1 } },
+
         {
-            $lookup: {
-                from: "users",
-                localField: "owner",
-                foreignField: "_id",
-                as: "owner",
-                pipeline: [
-                    {
-                        $project: {
-                            username: 1,
-                            avatar: 1
-                        }
-                    }
-                ]
-            }
+        $lookup: {
+            from: "users",
+            localField: "owner",
+            foreignField: "_id",
+            as: "owner",
+            pipeline: [{ $project: { username: 1, avatar: 1 } }],
+        },
         },
         { $addFields: { owner: { $first: "$owner" } } },
+
         {
-            $project: {
-                content: 1,
-                createdAt: 1,
-                updatedAt: 1,
-                owner: 1
-            }
+        $project: {
+            content: 1,
+            createdAt: 1,
+            updatedAt: 1,
+            owner: 1,
         },
+        },
+
+        {
+        $lookup: {
+            from: "likes",
+            localField: "_id",
+            foreignField: "comment",
+            as: "likes",
+        },
+        },
+
+        {
+        $addFields: {
+            likeCount: { $size: "$likes" },
+            liked: {
+            $in: [
+                new mongoose.Types.ObjectId(req.user._id),
+                "$likes.likedBy",
+            ],
+            },
+        },
+        },
+
+        // 🔥 REMOVE likes array
+        {
+        $project: {
+            likes: 0,
+        },
+        },
+
         { $skip: skip },
-        { $limit: limit }
-    ]);
+        { $limit: limit },
+            ]);
+
 
     const totalComments = await Comment.countDocuments({ video: videoId });
-
     return res.status(200).json(
         new ApiResponse(
             200,
@@ -125,15 +89,120 @@ const getVideoComments = asyncHandler(async (req, res) => {
                     page,
                     limit,
                     totalPages: Math.ceil(totalComments / limit)
-                }
+                },
+
             },
             "All comments fetched successfully"
         )
     );
 });
 
+const getTweetComments=asyncHandler(async(req,res)=>{
+    const {tweetId}=req.params
+    if(!mongoose.Types.ObjectId.isValid(tweetId)){
+        throw new ApiError(400,"invalid tweetId")
+    }
+    const comments=await Comment.aggregate([
+        {
+            $match:{tweet:new mongoose.Types.ObjectId(tweetId)}
+        },
+        {$sort:{createdAt:-1}},
+        {
+            $lookup:{
+                from:"users",
+                localField:"owner",
+                foreignField:"_id",
+                as:"owner",
+                pipeline:[
+                    {
+                        $project:{
+                            username:1,
+                            fullName:1,
+                            avatar:1
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            $addFields:{owner:{$first:"$owner"}}
+        },
+        {
+          $lookup:{
+            from:"likes",
+            localField:"_id",
+            foreignField:"tweet",
+            as:"likes"
+            }  
+        },
+        {
+            $addFields:{
+                likeCount:{$size:"$likes"},
+                liked:{$in:[new mongoose.Types.ObjectId(req.user._id),"$likes.likedBy"]}
+            }
+        },
+        {
+        $project: {
+            content: 1,
+            createdAt: 1,
+            owner: 1,
+            likeCount: 1,
+            liked: 1,
+        },
+        },
+    
+    ])
+    return res.status(200).json(
+    new ApiResponse(
+      200,
+      { comments },
+      "Tweet comments fetched successfully"
+    )
+  );
+    
+})
 
-const addComment = asyncHandler(async (req, res) => {
+const addTweetComment = asyncHandler(async (req, res) => {
+  const { tweetId } = req.params;
+  const { content } = req.body;
+
+  if (!content?.trim()) {
+    throw new ApiError(400, "Content is required");
+  }
+
+  if (!mongoose.Types.ObjectId.isValid(tweetId)) {
+    throw new ApiError(400, "Invalid tweetId");
+  }
+
+  // 1️⃣ Create comment
+  const comment = await Comment.create({
+    content,
+    tweet: tweetId,
+    owner: req.user._id,
+  });
+
+  // 2️⃣ Populate owner (🔥 MOST IMPORTANT FIX)
+  const populatedComment = await Comment.findById(comment._id)
+    .populate("owner", "username fullName avatar");
+
+  // 3️⃣ Add defaults expected by frontend
+  const responseComment = {
+    ...populatedComment.toObject(),
+    liked: false,
+    likeCount: 0,
+  };
+
+  return res.status(201).json(
+    new ApiResponse(
+      201,
+      responseComment,
+      "Comment added successfully"
+    )
+  );
+});
+
+
+const addVideoComment = asyncHandler(async (req, res) => {
     // TODO: add a comment to a video
     const {videoId}=req.params
     const {content}=req.body
@@ -205,7 +274,9 @@ const deleteComment = asyncHandler(async (req, res) => {
 
 export {
     getVideoComments, 
-    addComment, 
+    getTweetComments,
+    addVideoComment,
+    addTweetComment, 
     updateComment,
     deleteComment
     }

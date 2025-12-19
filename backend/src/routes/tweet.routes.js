@@ -13,7 +13,7 @@ router.use(verifyJwt); // Apply verifyJWT middleware to all routes in this file
 
 router.route("/").post( upload.single("image"),createTweet);
 router.route("/").get(getAllTweete)
-router.route("/channel/post").get(getUserTweets);
+router.route("/:username/post").get(getUserTweets);
 router.route("/:tweetId").patch(updateTweet).delete(deleteTweet);
 
 export default router

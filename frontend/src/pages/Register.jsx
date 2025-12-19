@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Mail, Lock, User, AtSign } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-
+import { registerUser } from "../services/user.api";
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const navigate=useNavigate()
   const [formData, setFormData] = useState({
   fullName: "",
   username: "",
@@ -37,21 +38,30 @@ const handleChange = (e) => {
 
 
 
-const handleSubmit = (e) => {
+const handleSubmit = async(e) => {
   e.preventDefault();
 
-  const data = new FormData();
-  data.append("fullName", formData.fullName);
-  data.append("username", formData.username);
-  data.append("email", formData.email);
-  data.append("password", formData.password);
-  data.append("confirmPassword", formData.confirmPassword);
-  data.append("avatar", formData.avatar);
-  if (formData.coverImage) {
-    data.append("coverImage", formData.coverImage);
+  try {
+    const data = new FormData();
+    data.append("fullName", formData.fullName);
+    data.append("username", formData.username);
+    data.append("email", formData.email);
+    data.append("password", formData.password);
+    data.append("confirmPassword", formData.confirmPassword);
+    if(formData.avatar){
+    data.append("avatar", formData.avatar);
+    }
+    if (formData.coverImage) {
+      data.append("coverImage", formData.coverImage);
+    }
+    const res=await registerUser(data)
+    
+    alert("register successfull now you can login")
+    if(res){navigate("/login")}
+  } catch (error) {
+    console.log("registration error",error?.message)
   }
 
-  console.log("Register payload:", Object.fromEntries(data));
 };
 
 

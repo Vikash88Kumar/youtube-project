@@ -15,87 +15,171 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Invalid videoId");
     }
 
-    const video = await Video.findById(videoId).select("_id");
+    const video = await Video.findById(videoId);
     if (!video) throw new ApiError(404, "Video not found");
 
-  // attempt to toggle using unique index; handle race conditions
-  // try to create a Like; if duplicate key error -> like already exists => remove it
-    try {
-        await Like.create({ likedBy: req.user._id, video: videoId });
-        const likesCount = await Like.countDocuments({ video: videoId });
-        return res.status(200).json(new ApiResponse(200, { liked: true,likedBy:req.user._id, likesCount }, "Liked"));
-        } catch (err) {
-        // duplicate key means like already exists -> remove it (unlike)
-        if (err.code === 11000) {
-        await Like.deleteOne({ likedBy: req.user._id, video: videoId });
-        const likesCount = await Like.countDocuments({ video: videoId });
-        return res.status(200).json(new ApiResponse(200, { liked: false, likesCount }, "Like removed"));
-        }
-        console.error("toggleVideoLike error:", err);
-        throw new ApiError(500, "Failed to toggle like");
+    let liked
+    const existingVideo=await Like.findOne({likedBy:req.user._id,video:videoId})
+ 
+    if(existingVideo){
+        await Like.deleteOne({_id:existingVideo._id});
+        liked=false
+    }else{
+        await Like.create({likedBy:req.user._id,video:videoId})
+        liked=true
     }
+    const likeCount = await Like.countDocuments({ video: videoId });
+
+     return res.status(200).json(
+    new ApiResponse(
+      200,
+      { liked, likeCount },
+      liked ? "video liked" : "Like removed"
+    )
+  );
     
 })
-//check comment and tweet like
 const toggleCommentLike = asyncHandler(async (req, res) => {
-    const {commentId} = req.params
-    //TODO: toggle like on comment
-    if(!mongoose.Types.ObjectId.isValid(commentId)){
-        throw new ApiError(400,"invalid commentId")
-    }
-    const comment=Comment.findById(commentId)
-    if(!comment){
-        throw new ApiError(400,"Comment not found")
-    }
-    try {
-        await Like.create({likedBy:req.user._id,comment:commentId})
-        const likeCount=await Like.countDocuments({comment:commentId})
-        return res.status(200).json(new ApiResponse(200,{liked:true,likeCount},"Comment Liked"))
-    } catch (error) {
-        if(error.code===11000){
-            await Like.deleteOne({likedBy:req.user._id,comment:commentId})
-        }
-        const likesCount = await Like.countDocuments({ comment: commentId });
-        return res.status(200).json(new ApiResponse(200, { liked: false, likesCount }, "Comment Like removed"));
+  const { commentId } = req.params;
 
-        console.error("toggleVideoLike error:", error);
-        throw new ApiError(500, "Failed to toggle like");
-    }
+  if (!mongoose.Types.ObjectId.isValid(commentId)) {
+    throw new ApiError(400, "Invalid CommentID");
+  }
 
-})
+  const comment = await Comment.findById(commentId);
+  if (!comment) {
+    throw new ApiError(404, "Comment not found");
+  }
 
+  const existingComment = await Like.findOne({
+    likedBy: req.user._id,
+    comment: commentId,
+  });
+
+  let liked;
+
+  if (existingComment) {
+    await Like.deleteOne({ _id: existingComment._id });
+    liked = false;
+  } else {
+    await Like.create({
+      likedBy: req.user._id,
+      comment: commentId,
+    });
+    liked = true;
+  }
+
+  const likeCount = await Like.countDocuments({ comment: commentId });
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      { liked, likeCount },
+      liked ? "comment liked" : "Like removed"
+    )
+  );
+});
 const toggleTweetLike = asyncHandler(async (req, res) => {
-    const {tweetId} = req.params
-    //TODO: toggle like on tweet
+  const { tweetId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(tweetId)) {
+    throw new ApiError(400, "Invalid TweetId");
+  }
+
+  const tweet = await Tweet.findById(tweetId);
+  if (!tweet) {
+    throw new ApiError(404, "Tweet not found");
+  }
+
+  const existingLike = await Like.findOne({
+    likedBy: req.user._id,
+    tweet: tweetId,
+  });
+
+  let liked;
+
+  if (existingLike) {
+    await Like.deleteOne({ _id: existingLike._id });
+    liked = false;
+  } else {
+    await Like.create({
+      likedBy: req.user._id,
+      tweet: tweetId,
+    });
+    liked = true;
+  }
+
+  const likeCount = await Like.countDocuments({ tweet: tweetId });
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      { liked, likeCount },
+      liked ? "Tweet liked" : "Like removed"
+    )
+  );
+});
+const getLikedTweets=asyncHandler(async(req,res)=>{
+    const {tweetId}=req.params
+
     if(!mongoose.Types.ObjectId.isValid(tweetId)){
-        throw new ApiError(400,"Invalid TweetId")
+        throw new ApiError(400,"invalid tweetId")
     }
     const tweet=await Tweet.findById(tweetId)
     if(!tweet){
-        throw new ApiError(500,"Tweet not found")
+        throw new ApiError(400,"tweet not found")
     }
-    try {
-        await Like.create({likedBy:req.user._id,tweet:tweetId})
-        const likeCount=await Like.countDocuments({tweet:tweetId})
-        return res.status(200).json(new ApiResponse(200,{liked:true,likeCount},"Liked"))
-    } catch (error) {
-        if(error.code===11000){
-            await Like.deleteOne({likedBy:req.user._id,tweet:tweetId})
-            const likesCount = await Like.countDocuments({ tweet: tweetId });
-            return res.status(200).json(new ApiResponse(200, { liked: false, likesCount }, "Like removed"));
-        }
-        console.error("toggleVideoLike error:", err);
-        throw new ApiError(500, "Failed to toggle like");
-        
-    }
-})
+    const userLike=await Like.findOne({likedBy:req.user._id,tweet:tweetId})
+    const likeCount=await Like.countDocuments({tweet:tweetId})
+    
+    return res.status(200)
+    .json(
+        new ApiResponse(200,
+            {liked:Boolean(userLike),likeCount}
+            ,"get liked Tweets"))
 
-const getLikedVideos = asyncHandler(async (req, res) => {
+})
+const getLikedperVideo=asyncHandler(async(req,res)=>{
+    const {videoId}=req.params
+    if(!mongoose.Types.ObjectId.isValid(videoId)){
+        throw new ApiError(402,"invalid videoId")
+    }
+    const video=await Video.findById(videoId)
+    if(!video){
+        throw new ApiError(402,"video not found")
+    }
+    const userLike=await Like.findOne({likedBy:req.user._id,video:videoId})
+    const likeCount=await Like.countDocuments({video:videoId})
+
+    return res.status(200).json(new ApiResponse(200,{liked:Boolean(userLike),likeCount},"get Liked per videos"))
+})
+const getLikedComments=asyncHandler(async(req,res)=>{
+    const {commentId}=req.params
+
+    if(!mongoose.Types.ObjectId.isValid(commentId)){
+        throw new ApiError(400,"invalid commentId")
+    }
+    const comment=await Comment.findById(commentId)
+    if(!comment){
+        throw new ApiError(400,"comment not found")
+    }
+    const userLike=await Like.findOne({likedBy:req.user._id,comment:commentId})
+    const likeCount=await Like.countDocuments({comment:commentId})
+    
+    return res.status(200)
+    .json(
+        new ApiResponse(200,
+            {liked:Boolean(userLike),likeCount}
+            ,"get liked comments"))
+
+})
+    const getLikedVideos = asyncHandler(async (req, res) => {
     //TODO: get all liked videos
     const likedVideos=await Like.aggregate([
         {
             $match:{
-                likedBy:req.user._id
+                likedBy:req.user._id,
+                video: { $exists: true, $ne: null },
             }
         },
         {
@@ -146,5 +230,8 @@ export {
     toggleCommentLike,
     toggleTweetLike,
     toggleVideoLike,
-    getLikedVideos
+    getLikedVideos,
+    getLikedTweets,
+    getLikedperVideo,
+    getLikedComments
 }

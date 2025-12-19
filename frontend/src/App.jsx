@@ -22,6 +22,10 @@ import Shorts from "./pages/Shorts";
 import VideoPlayer from "./pages/VideoPlayer";
 import Notifications from "./pages/Notifications";
 import SearchResults from "./pages/SearchResults";
+import PlaylistPage from "./pages/PlaylistPage";
+
+
+
 
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
@@ -62,9 +66,10 @@ const App = () => {
           <Route path="/settings" element={<Settings />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/channel" element={<Channel />} />
+          <Route path="/channel/:username" element={<Channel />} />
           <Route path="/watch" element={<Watch />} />
-          <Route path="/shorts" element={<Shorts />} />
+          <Route path="/shorts/:id" element={<Shorts />} />
+          <Route path="/playlist/:playlistId" element={<PlaylistPage />} />
           <Route path="/upload" element={<Upload />} />
           <Route path="/videos/:id" element={<VideoPlayer />} />
           <Route path="/notifications" element={<Notifications />} />

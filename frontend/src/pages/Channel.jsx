@@ -19,8 +19,9 @@ import { useEffect } from "react";
 import { getUserChannelProfile } from "../services/user.api.js";
 import { getChannelVideos } from "../services/dashboard.api.js";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getUserTweets } from "../services/tweets.api.js";
+import { getUserChannelSubscribers } from "../services/subscriptions.api.js";
 
 // const channelData = {
 //   name: "TechVision Studio",
@@ -85,6 +86,9 @@ const channelVideos = [
 ];
 
 const Channel = () => {
+  const {username}=useParams()
+
+
   const [channelData,setChannelData]=useState({})
   const [getchannelvideos,setGetChannelvideos]=useState([])
   const [userTweets,setUserTweets]=useState([])
@@ -92,28 +96,31 @@ const Channel = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("channel");
   const [isSubscribed, setIsSubscribed] = useState(false);
-
-  const { userData } = useSelector(state => state.auth);
+  const [subscribers,setSubscribers]=useState([])
+  // const { userData } = useSelector(state => state.auth);
   const navigate=useNavigate()
 
   //useEffect
   useEffect(() => {
-    if (!userData?.username) return;
+    if (!username) return;
     const fetchChannel = async () => {
     try {
-      const res = await getUserChannelProfile(userData?.username)
+      const res = await getUserChannelProfile(username)
       setChannelData(res.data);
-      const re=await getChannelVideos(userData?.username)
-      setGetChannelvideos(re.data.videos)
-      const response = await getUserTweets();
-      setUserTweets(response.data.results[0].data);
+      const re=await getChannelVideos(username)
+      setGetChannelvideos(re.data?.videos)
+      const response = await getUserTweets(username);
+      setUserTweets(response.data?.results[0].data);
+      const resp=await getUserChannelSubscribers(username)
+      setSubscribers(resp[0]?.subscriber)
+      
     } catch (error) {
       console.error(error);
     }
   };
 
   fetchChannel();
-  }, [userData?.username]);
+  }, [username]);
   
 
   return (
@@ -284,6 +291,12 @@ const Channel = () => {
                   Community
                 </TabsTrigger>
                 <TabsTrigger 
+                  value="subscribers" 
+                  className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3"
+                >
+                Your Subscribers
+                </TabsTrigger>
+                <TabsTrigger 
                   value="about" 
                   className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-6 py-3"
                 >
@@ -293,7 +306,7 @@ const Channel = () => {
 
               <TabsContent value="videos" className="mt-0">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-8">
-                  {getchannelvideos.map((video) => {
+                  {!getChannelVideos?"No Videos yet":getchannelvideos.map((video) => {
                     const owner = video.owner; // already populated from backend
 
                     return (
@@ -354,7 +367,7 @@ const Channel = () => {
               </TabsContent>
               <TabsContent value="posts" className="mt-0">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-8">
-                  {userTweets?.map((tweet) => {
+                  {!userTweets?"No Tweets yet" :userTweets?.map((tweet) => {
                     const owner =   tweet.owner; 
 
                     return (
@@ -397,6 +410,33 @@ const Channel = () => {
                             </p>
                           </div>
                         </div>
+                      </div>
+                    );
+                  })}
+
+                </div>
+              </TabsContent>
+              <TabsContent value="subscribers" className="mt-0">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-8">
+                  {!subscribers? "No subscribers yet" :subscribers?.map((subscriber) => {
+
+                    return (
+                      <div
+                        key={subscriber._id}
+                        onClick={()=>{navigate(`/channel/${subscriber?.username}`)}}
+                        className="group cursor-pointer"
+                      >
+                        
+                        {subscriber.avatar ? (
+                          <div className="relative w-24 h-24 rounded-full overflow-hidden bg-black">
+                            <img
+                              src={subscriber.avatar}
+                              alt={subscriber.username}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : ""}
+                          <div>{subscriber.username}</div>
                       </div>
                     );
                   })}
