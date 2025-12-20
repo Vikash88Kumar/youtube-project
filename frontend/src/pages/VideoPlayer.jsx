@@ -64,11 +64,8 @@ export default function VideoPlayer() {
   const [subLoading, setSubLoading] = useState(false);
 
 
-  const handleToggleSubscription = async () => {
+  const handleToggleSubscription = async (id) => {
   if (subLoading) return;
-
-  const channelId = channelData._id;
-  if (!channelId) return;
 
   const prevSubscribed = isSubscribed;
   const prevCount = subscribersCount;
@@ -81,7 +78,7 @@ export default function VideoPlayer() {
   setSubLoading(true);
 
   try {
-    const res = await toggleSubscription(channelId);
+    const res = await toggleSubscription(id);
 
     // ✅ backend is source of truth
     setIsSubscribed(res.data.data.subscribed);
@@ -268,7 +265,7 @@ export default function VideoPlayer() {
                 </div>
 
                 <Button
-                onClick={handleToggleSubscription}
+                onClick={handleToggleSubscription(owner?._id)}
                 disabled={subLoading}
                 variant={isSubscribed ? "secondary" : "default"}
                 className="gap-2 transition-all"
