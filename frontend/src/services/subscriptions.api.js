@@ -2,8 +2,8 @@ import api from "../api/axios.js"
 
 export const toggleSubscription=async(channelId)=>{
     try {
-        const res =await api.post(`/subscriptions/c/${channelId}`)
-        return res.data
+        return await api.post(`/subscriptions/c/${channelId}`)
+        
     } catch (error) {
         console.log("toggle subsccription failed",error?.message)
     }
