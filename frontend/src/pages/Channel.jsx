@@ -21,7 +21,7 @@ import { getChannelVideos } from "../services/dashboard.api.js";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { getUserTweets } from "../services/tweets.api.js";
-import { getUserChannelSubscribers } from "../services/subscriptions.api.js";
+import { getUserChannelSubscribers,toggleSubscription } from "../services/subscriptions.api.js";
 
 // const channelData = {
 //   name: "TechVision Studio",
@@ -95,6 +95,7 @@ const Channel = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("channel");
   const navigate = useNavigate()
+  const [subscribers,setSubscribers]=useState([])
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscribersCount, setSubscribersCount] = useState(0);
   const [subLoading, setSubLoading] = useState(false);
