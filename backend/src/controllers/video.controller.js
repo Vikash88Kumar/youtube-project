@@ -123,8 +123,8 @@ const publishAVideo = asyncHandler(async (req, res) => {
         throw new ApiError(400,"Error occured on uplaoding video")
     }
     const videoDoc=await Video.create({
-        videoFile:videoFile.url,
-        thumbnail:thumbnail.url,
+        videoFile:videoFile.secure_url,
+        thumbnail:thumbnail.secure_url,
         title,
         description,
         owner:req.user?._id,
@@ -195,7 +195,7 @@ const updateVideo = asyncHandler(async (req, res) => {
             $set:{
                 title,
                 description,
-                thumbnail:newThumbnail
+                thumbnail:newThumbnail.secure_url
             }
         },
         {new:true}

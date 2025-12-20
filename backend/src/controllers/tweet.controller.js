@@ -22,7 +22,7 @@ const createTweet = asyncHandler(async (req, res) => {
         if(!image?.url){
             throw new ApiError(500,"Image upload failed")
         }
-        imageUrl=image.url
+        imageUrl=image.secure_url
     }
 
     if (!req.user?._id) {

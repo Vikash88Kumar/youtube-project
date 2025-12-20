@@ -23,7 +23,7 @@ const createPlaylist = asyncHandler(async (req, res) => {
     const playlist=await Playlist.create({
         name,
         description,
-        thumbnail:thumbnail.url,
+        thumbnail:thumbnail.secure_url,
         visibility,
         owner:req.user._id
     })
