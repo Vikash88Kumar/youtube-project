@@ -64,13 +64,14 @@ export default function VideoPlayer() {
   const [subLoading, setSubLoading] = useState(false);
 
 
-  const handleToggleSubscription = async (id) => {
+const handleToggleSubscription = async () => {
   if (subLoading) return;
+  if (!owner?._id) return; // 🔒 guard
 
   const prevSubscribed = isSubscribed;
   const prevCount = subscribersCount;
 
-  // 🔥 optimistic update
+  // optimistic UI
   setIsSubscribed(!prevSubscribed);
   setSubscribersCount(
     prevSubscribed ? prevCount - 1 : prevCount + 1
@@ -80,19 +81,19 @@ export default function VideoPlayer() {
   try {
     const res = await toggleSubscription(owner._id);
 
-    // ✅ backend is source of truth
     setIsSubscribed(res.data.data.subscribed);
     setSubscribersCount(res.data.data.subscribersCount);
   } catch (error) {
     console.error("Subscription toggle failed", error?.message);
 
-    // ❌ rollback
+    // rollback
     setIsSubscribed(prevSubscribed);
     setSubscribersCount(prevCount);
   } finally {
     setSubLoading(false);
   }
 };
+
 
 
 
@@ -109,8 +110,11 @@ export default function VideoPlayer() {
         const videoData = res.data.data;
 
         setVideo(videoData);
-        setOwner(videoData.owner?.[0] || null);
+        setOwner(videoData.owner || null);
         setIsSubscribed(videoData.isSubscribed || false);
+        setIsSubscribed(videoData.isSubscribed || false);
+        setSubscribersCount(videoData.subscribersCount || 0);
+
       } catch (err) {
         console.error("Failed to fetch video", err);
       }
