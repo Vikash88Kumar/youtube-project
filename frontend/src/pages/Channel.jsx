@@ -101,7 +101,7 @@ const Channel = () => {
   const [subLoading, setSubLoading] = useState(false);
 
 
-  const handleToggleSubscription = async () => {
+  const handleToggleSubscription = async (id) => {
     if (subLoading) return;
 
     // save previous state (rollback safety)
@@ -117,7 +117,7 @@ const Channel = () => {
 
     try {
       // call backend controller
-      const res = await toggleSubscription(owner._id);
+      const res = await toggleSubscription(id);
 
       // sync with backend (source of truth)
       setIsSubscribed(res.data.data.subscribed);
@@ -276,7 +276,7 @@ const Channel = () => {
               {/* Actions */}
               <div className="flex items-start gap-2">
                 <Button
-                  onClick={handleToggleSubscription}
+                  onClick={handleToggleSubscription(channelData._id)}
                   variant={isSubscribed ? "secondary" : "default"}
                   className="gap-2 rounded-full"
                   disabled={subLoading}
