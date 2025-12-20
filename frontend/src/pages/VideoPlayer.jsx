@@ -271,7 +271,7 @@ const handleToggleSubscription = async () => {
                       @{owner.username}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {subscribersCount || 0}
+                      {subscribersCount || 0} subscribers
                     </p>
                   </div>
                 </div>
