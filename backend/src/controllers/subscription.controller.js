@@ -27,6 +27,17 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 
 })
 
+const getSubscriptions=asyncHandler(async(req,res)=>{
+    const {channelId}=req.params
+    if(!mongoose.Types.ObjectId.isValid(channelId)){
+        throw new ApiError(400,"inavlid channelId")
+    }
+    const isSubscribed=await Subscription.findOne({channel:channelId,subscriber:req.user._id})
+    const subscribersCount=await Subscription.countDocuments({channel:channelId})
+
+    return res.status(200)
+    .json(new ApiResponse(200,{isSubscribed:Boolean(isSubscribed),subscribersCount},"get subscriebr count successfully"))
+})
 // controller to return subscriber list of a channel
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
     const {username} = req.params
@@ -98,5 +109,6 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
 export {
     toggleSubscription,
     getUserChannelSubscribers,
-    getSubscribedChannels
+    getSubscribedChannels,
+    getSubscriptions
 }

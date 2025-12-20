@@ -48,7 +48,6 @@ export default function VideoPlayer() {
   /* ================= VIDEO ================= */
   const [video, setVideo] = useState(null);
   const [owner, setOwner] = useState(null);
-  const [isSubscribed, setIsSubscribed] = useState(false);
 
   /* ================= VIDEO LIKE ================= */
   const [liked, setLiked] = useState(false);
@@ -59,6 +58,48 @@ export default function VideoPlayer() {
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
   const [isPosting, setIsPosting] = useState(false);
+
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [subscribersCount, setSubscribersCount] = useState(0);
+  const [subLoading, setSubLoading] = useState(false);
+
+
+    const handleToggleSubscription = async () => {
+    if (subLoading) return;
+
+    // save previous state (rollback safety)
+    const prevSubscribed = isSubscribed;
+    const prevCount = subscribersCount;
+
+    // optimistic UI update
+    setIsSubscribed(!prevSubscribed);
+    setSubscribersCount(
+      prevSubscribed ? prevCount - 1 : prevCount + 1
+    );
+    setSubLoading(true);
+
+    try {
+      // call backend controller
+      const res = await toggleSubscription(owner._id);
+
+      // sync with backend (source of truth)
+      setIsSubscribed(res.data.data.subscribed);
+      setSubscribersCount(res.data.data.subscribersCount);
+    } catch (error) {
+      console.error("Subscription toggle failed", error?.message);
+
+      // rollback UI
+      setIsSubscribed(prevSubscribed);
+      setSubscribersCount(prevCount);
+    } finally {
+      setSubLoading(false);
+    }
+  };
+
+
+
+
+
 
   /* ================= FETCH VIDEO ================= */
   useEffect(() => {
@@ -182,13 +223,13 @@ export default function VideoPlayer() {
             {/* ================= VIDEO SECTION ================= */}
             <div className="flex-1">
               <div className=" aspect-video bg-black rounded-xl overflow-hidden mb-4 flex justify-center">
-  <video
-    src={video.videoFile}
-    controls
-    poster={video.thumbnail}
-    className="h-full  object-contain"
-  />
-</div>
+            <video
+              src={video.videoFile}
+              controls
+              poster={video.thumbnail}
+              className="h-full  object-contain"
+            />
+          </div>
 
               <h1 className="text-xl lg:text-2xl font-bold mb-2">
                 {video.title}
@@ -226,14 +267,17 @@ export default function VideoPlayer() {
                 </div>
 
                 <Button
+                  onClick={handleToggleSubscription}
                   variant={isSubscribed ? "secondary" : "default"}
-                  onClick={async () => {
-                    const res = await toggleSubscription(owner._id);
-                    setIsSubscribed(res.data.subscribed);
-                  }}
-                  className="rounded-full px-6"
+                  className="gap-2 rounded-full"
+                  disabled={subLoading}
                 >
-                  {isSubscribed ? "Subscribed" : "Subscribe"}
+                  {isSubscribed && <Bell className="h-4 w-4" />}
+                  {subLoading
+                    ? "Updating..."
+                    : isSubscribed
+                      ? "Subscribed"
+                      : "Subscribe"}
                 </Button>
               </div>
 

@@ -153,14 +153,30 @@ const getVideoById = asyncHandler(async (req, res) => {
                 as:"owner",
                 pipeline:[
                     {
-                        $project:{
-                            username:1,
-                            fullName:1,
-                            avatar:1
-                        }
+                      $project:{username:1,fullName:1,avatar:1}
                     }
                 ]
             }
+        },
+        {
+          $addFields:{owner:{$first:"$owner"}}
+        },
+        {
+          $lookup:{
+            from:"subscriptions",
+            localField:"owner._id",
+            foreignField:"channel",
+            as:"subscriptions"
+          }
+        },
+        {
+          $addFields:{
+            subscribersCount:{$size:"$subscriptions"},
+            isSubscribed:{$in:[new mongoose.Types.ObjectId(req.user._id),"$subscriptions.subscriber"]}
+          }
+        },
+        {
+          $project:{subscriptions:0}
         }
     ])
     return res.status(200).json(
