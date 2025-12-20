@@ -112,7 +112,6 @@ const handleToggleSubscription = async () => {
         setVideo(videoData);
         setOwner(videoData.owner || null);
         setIsSubscribed(videoData.isSubscribed || false);
-        setIsSubscribed(videoData.isSubscribed || false);
         setSubscribersCount(videoData.subscribersCount || 0);
 
       } catch (err) {
