@@ -531,13 +531,13 @@ export default function VideoPlayer() {
     }
   };
 
-  if (!video || !owner) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-muted-foreground">
-        Loading video...
-      </div>
-    );
-  }
+  // if (!video || !owner) {
+  //   return (
+  //     <div className="min-h-screen flex items-center justify-center text-muted-foreground">
+  //       Loading video...
+  //     </div>
+  //   );
+  // }
 
   /* ================= UI ================= */
   return (
