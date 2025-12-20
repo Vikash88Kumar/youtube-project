@@ -196,7 +196,7 @@ export default function Messages() {
         <div className="flex-1 overflow-y-auto">
           {chatRooms
             .filter((c) =>
-              c.chatWith.username
+              c.chatWith?.username
                 .toLowerCase()
                 .includes(search.toLowerCase())
             )
@@ -207,15 +207,15 @@ export default function Messages() {
                 className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-secondary/70"
               >
                 <Avatar className="h-12 w-12">
-                  <AvatarImage src={chat.chatWith.avatar} />
+                  <AvatarImage src={chat.chatWith?.avatar} />
                   <AvatarFallback>
-                    {chat.chatWith.username.slice(0, 2)}
+                    {chat.chatWith?.username.slice(0, 2)}
                   </AvatarFallback>
                 </Avatar>
 
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold truncate">
-                    {chat.chatWith.username}
+                    {chat.chatWith?.username}
                   </p>
                   <p className="text-sm text-muted-foreground truncate">
                     {chat.lastMessage?.content}
