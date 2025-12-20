@@ -9,43 +9,22 @@ import {asyncHandler} from "../utils/asyncHandler.js"
 const toggleSubscription = asyncHandler(async (req, res) => {
         const {channelId} = req.params
         // TODO: toggle subscription
-        if (!mongoose.Types.ObjectId.isValid(channelId)) {
-        throw new ApiError(400, "Invalid channelId");
+    if(!mongoose.Types.ObjectId.isValid(channelId)){
+        throw new ApiError(400,"invalid channelId")
     }
+    let subscribed
+    const existedSubscriber=await Subscription.findOne({channel:channelId,subscriber:req.user._id})
+    if(existedSubscriber){
+        await Subscription.deleteOne({_id:existedSubscriber._id})
+        subscribed=false
+    }else{
+        await Subscription.create({channel:channelId,subscriber:req.user._id})
+        subscribed=true
+    }
+    const subscribersCount=await Subscription.countDocuments({channel:channelId})
+    return res.status(200).json(new ApiResponse(200,{subscribed,subscribersCount},"subscription toggle successful"))
 
-    if (!req.user || !req.user._id) {
-        throw new ApiError(401, "Unauthorized");
-    }
-    if (String(req.user._id) === String(channelId)) {
-        throw new ApiError(400, "You cannot subscribe to yourself");
-    }
-    const channel = await User.findById(channelId).select("_id");
-    if (!channel) {
-        throw new ApiError(404, "Channel not found");
-    }
 
-    const userId = new mongoose.Types.ObjectId(req.user._id);
-    const chanId = new mongoose.Types.ObjectId(channelId);
-
-    try {
-        await Subscription.create({ subscriber: userId, channel: chanId });
-        const subscribersCount = await Subscription.countDocuments({ channel: chanId });
-        return res.status(200).json(
-        new ApiResponse(200, { subscribed: true, subscribersCount }, "Subscribed")
-        );
-    } catch (err) {
-        if (err && err.code === 11000) {
-        await Subscription.deleteOne({ subscriber: userId, channel: chanId });
-        const subscribersCount = await Subscription.countDocuments({ channel: chanId });
-        return res.status(200).json(
-            new ApiResponse(200, { subscribed: false, subscribersCount }, "Unsubscribed")
-        );
-        }
-
-        // Other errors — rethrow as server error
-        console.error("toggleSubscription error:", err);
-        throw new ApiError(500, "Failed to toggle subscription");
-    }
 })
 
 // controller to return subscriber list of a channel
