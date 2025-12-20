@@ -64,37 +64,38 @@ export default function VideoPlayer() {
   const [subLoading, setSubLoading] = useState(false);
 
 
-    const handleToggleSubscription = async () => {
-    if (subLoading) return;
+  const handleToggleSubscription = async () => {
+  if (subLoading) return;
 
-    // save previous state (rollback safety)
-    const prevSubscribed = isSubscribed;
-    const prevCount = subscribersCount;
+  const channelId = channelData._id;
+  if (!channelId) return;
 
-    // optimistic UI update
-    setIsSubscribed(!prevSubscribed);
-    setSubscribersCount(
-      prevSubscribed ? prevCount - 1 : prevCount + 1
-    );
-    setSubLoading(true);
+  const prevSubscribed = isSubscribed;
+  const prevCount = subscribersCount;
 
-    try {
-      // call backend controller
-      const res = await toggleSubscription(owner._id);
+  // 🔥 optimistic update
+  setIsSubscribed(!prevSubscribed);
+  setSubscribersCount(
+    prevSubscribed ? prevCount - 1 : prevCount + 1
+  );
+  setSubLoading(true);
 
-      // sync with backend (source of truth)
-      setIsSubscribed(res.data.data.subscribed);
-      setSubscribersCount(res.data.data.subscribersCount);
-    } catch (error) {
-      console.error("Subscription toggle failed", error?.message);
+  try {
+    const res = await toggleSubscription(channelId);
 
-      // rollback UI
-      setIsSubscribed(prevSubscribed);
-      setSubscribersCount(prevCount);
-    } finally {
-      setSubLoading(false);
-    }
-  };
+    // ✅ backend is source of truth
+    setIsSubscribed(res.data.data.subscribed);
+    setSubscribersCount(res.data.data.subscribersCount);
+  } catch (error) {
+    console.error("Subscription toggle failed", error?.message);
+
+    // ❌ rollback
+    setIsSubscribed(prevSubscribed);
+    setSubscribersCount(prevCount);
+  } finally {
+    setSubLoading(false);
+  }
+};
 
 
 
@@ -267,18 +268,14 @@ export default function VideoPlayer() {
                 </div>
 
                 <Button
-                  onClick={handleToggleSubscription}
-                  variant={isSubscribed ? "secondary" : "default"}
-                  className="gap-2 rounded-full"
-                  disabled={subLoading}
-                >
-                  {isSubscribed && <Bell className="h-4 w-4" />}
-                  {subLoading
-                    ? "Updating..."
-                    : isSubscribed
-                      ? "Subscribed"
-                      : "Subscribe"}
-                </Button>
+                onClick={handleToggleSubscription}
+                disabled={subLoading}
+                variant={isSubscribed ? "secondary" : "default"}
+                className="gap-2 transition-all"
+              >
+                {isSubscribed && <Bell className="h-4 w-4" />}
+                {isSubscribed ? "Subscribed" : "Subscribe"}
+              </Button>
               </div>
 
               {/* ================= ACTION BAR ================= */}

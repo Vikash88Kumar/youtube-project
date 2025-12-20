@@ -250,7 +250,7 @@ const Channel = () => {
                   <span>•</span>
                   <span>{channelData.channelsSubscribedToCount} channelSubscribedTo</span>
                   <span>•</span>
-                  <span>{channelData.subscribersCount} subscribers</span>
+                  <span>{subscribersCount} subscribers</span>
                   <span>•</span>
                   <span>{getchannelvideos.length} videos</span>
                 </div>
