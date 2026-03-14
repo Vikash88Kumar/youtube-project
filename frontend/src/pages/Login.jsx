@@ -44,7 +44,7 @@ const handleSubmit = async (e) => {
   try {
     const loginRes = await LoginUser({ email, password });
     console.log(loginRes)
-    dispatch(login(loginRes.data.data));
+    dispatch(login(loginRes.data.data.user));
 
     alert(loginRes.data.message || "Logged in successfully");
 
