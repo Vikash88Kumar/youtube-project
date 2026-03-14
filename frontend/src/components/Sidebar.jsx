@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { cn } from "../lib/utils.js";
 import { useNavigate, useLocation } from "react-router-dom";
-
+import { LogoutUser } from "../services/user.api.js";
 /* -------------------- DATA -------------------- */
 
 const menuItems = [
@@ -27,7 +27,7 @@ const libraryItems = [
   { id: "liked", icon: ThumbsUp, label: "Liked Videos", path: "/liked" },
   { id: "playlists", icon: PlaySquare, label: "Playlists", path: "/playlists" },
   { id:"login", icon:PlaySquare, label:"Login", path:"/login"},
-  { id:"logout", icon:PlaySquare, label:"LogOut", path:"/login"}
+  // { id:"logout", icon:PlaySquare, label:"LogOut", path:"/login"}
 ];
 
 /* -------------------- COMPONENT -------------------- */
@@ -120,6 +120,19 @@ const hoverEffect =
 
         {/* Spacer */}
         <div className="flex-1" />
+        <button
+          onClick={() => handleItemClick(LogoutUser())}
+          className={cn(
+            baseBtn,
+            transition,
+            hoverEffect,
+            isActive("/settings")
+              ? "bg-primary/15 text-primary shadow-sm"
+              : "text-muted-foreground"
+          )}
+        >
+          <span className="font-medium">Logout</span>
+        </button>
 
         {/* Settings */}
         <button
