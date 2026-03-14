@@ -6,12 +6,9 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 
-    const generateAccessRefreshToken=async(userId)=>{   
+    const generateAccessRefreshToken=async(user)=>{   
         try {
-            const user=await User.findById(userId)
-            if (!user) {
-                throw new ApiError(404, "User not found while generating tokens");
-            }
+            
             const accessToken=user.generateAccessToken()
             const refreshToken=user.generateRefreshToken()
     
@@ -84,7 +81,7 @@ import mongoose from "mongoose";
         if(!user.isPasswordCorrect(password)){
             throw new ApiError(404,"Password is incorrect");
         }
-        const {accessToken,refreshToken}= await generateAccessRefreshToken(user._id)
+        const {accessToken,refreshToken}= await generateAccessRefreshToken(user)
 
         const loggenInuser = user.toObject();
         delete loggenInuser.password;
@@ -270,7 +267,7 @@ import mongoose from "mongoose";
             secure: true
         }
     
-        const {accessToken, newRefreshToken} = await generateAccessAndRefereshTokens(user._id)
+        const {accessToken, newRefreshToken} = await generateAccessRefreshToken(user)
     
         return res
         .status(200)
