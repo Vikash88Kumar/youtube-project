@@ -26,7 +26,8 @@ const libraryItems = [
   { id: "history", icon: Clock, label: "History", path: "/history" },
   { id: "liked", icon: ThumbsUp, label: "Liked Videos", path: "/liked" },
   { id: "playlists", icon: PlaySquare, label: "Playlists", path: "/playlists" },
-  { id:"login", icon:PlaySquare, label:"Login", path:"/login"}
+  { id:"login", icon:PlaySquare, label:"Login", path:"/login"},
+  { id:"logout", icon:PlaySquare, label:"LogOut", path:"/login"}
 ];
 
 /* -------------------- COMPONENT -------------------- */
