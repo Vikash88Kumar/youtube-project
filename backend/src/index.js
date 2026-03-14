@@ -23,7 +23,6 @@ const startServer = async () => {
     }
   });
 
-  // 🔥 make io available to controllers
   initSocket(io);
 
   io.on("connection", (socket) => {

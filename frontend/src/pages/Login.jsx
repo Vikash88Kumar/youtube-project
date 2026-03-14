@@ -12,28 +12,54 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const dispatch=useDispatch()
   const navigate=useNavigate()
   //handleSubmit
-  const handleSubmit = async (e) => {
+//   const handleSubmit = async (e) => {
+//   e.preventDefault();
+
+//   try {
+//     const loginRes = await LoginUser({ email, password });
+//     //  Fetch current user (uses cookie)
+//     // const userRes = await getCurrentUser();
+//     dispatch(login(loginRes.data.data));
+//     alert(loginRes.data.message || "Logged in successfully");
+//     navigate("/");
+//   } catch (error) {
+//     console.error(error);
+//     alert(
+//       error.response?.data?.message ||
+//       error.message ||
+//       "Login failed"
+//     );
+//   }
+// };
+
+const handleSubmit = async (e) => {
   e.preventDefault();
+  setLoading(true);
 
   try {
     const loginRes = await LoginUser({ email, password });
-    //  Fetch current user (uses cookie)
-    const userRes = await getCurrentUser();
-    dispatch(login(userRes.data.data));
+
+    dispatch(login(loginRes.data.data.user));
+
     alert(loginRes.data.message || "Logged in successfully");
+
     navigate("/");
   } catch (error) {
-    console.error(error);
     alert(
       error.response?.data?.message ||
       error.message ||
       "Login failed"
     );
+  } finally {
+    setLoading(false);
   }
 };
+
 
 
   return (
@@ -93,9 +119,10 @@ const Login = () => {
               </Link>
             </div>
 
-            <Button type="submit" className="w-full">
-              Sign In
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Signing in..." : "Sign In"}
             </Button>
+
           </form>
 
           <div className="relative">

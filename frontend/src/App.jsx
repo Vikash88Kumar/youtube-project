@@ -36,18 +36,18 @@ const queryClient = new QueryClient();
 const App = () => {
   const dispatch = useDispatch();
 
-  useEffect(() => { 
-    const restoreAuth = async () => {
-      try {
-        const res = await getCurrentUser(); // reads cookie
-        dispatch(login(res.data.data));     // restore redux
-      } catch (error) {
-        dispatch(logout()); // not logged in
-      }
-    };
+    useEffect(() => { 
+      const restoreAuth = async () => {
+        try {
+          const res = await getCurrentUser(); // reads cookie
+          dispatch(login(res.data.data));     // restore redux
+        } catch (error) {
+          dispatch(logout()); // not logged in
+        }
+      };
 
-    restoreAuth();
-  }, [dispatch]);
+      restoreAuth();
+    }, [dispatch]);
 
   return( <QueryClientProvider client={queryClient}>
     <TooltipProvider>
