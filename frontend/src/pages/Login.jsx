@@ -9,7 +9,7 @@ import { LoginUser,getCurrentUser } from "../services/user.api";
 import { useDispatch } from "react-redux";
 
 const Login = () => {
-  const [showPassword, setShowPassword] = useState(false);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -44,7 +44,11 @@ const handleSubmit = async (e) => {
   try {
     const loginRes = await LoginUser({ email, password });
     console.log(loginRes)
-    dispatch(login(loginRes.data.data.user));
+    const user = loginRes.data?.data?.user;
+    if (!user) {
+      throw new Error("Login failed: invalid response from server");
+    }
+    dispatch(login(user));
 
     alert(loginRes.data.message || "Logged in successfully");
 
