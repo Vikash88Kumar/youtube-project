@@ -1,4 +1,5 @@
 import { useState } from "react";
+import {toast} from "../components/ui/sonner.jsx"
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { Button } from "../components/ui/button";
@@ -51,11 +52,11 @@ const handleSubmit = async (e) => {
     }
     dispatch(login(user));
 
-    alert(loginRes.data.message || "Logged in successfully");
+    toast.success(loginRes.data.message || "Logged in successfully");
 
     navigate("/");
   } catch (error) {
-    alert(
+    toast.success(
       error.response?.data?.message ||
       error.message ||
       "Login failed"
