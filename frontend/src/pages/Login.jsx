@@ -13,6 +13,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const dispatch=useDispatch()
   const navigate=useNavigate()
@@ -44,7 +45,7 @@ const handleSubmit = async (e) => {
   try {
     const loginRes = await LoginUser({ email, password });
     console.log(loginRes)
-    const user = loginRes.data?.data?.user;
+    const user = loginRes.data?.user;
     if (!user) {
       throw new Error("Login failed: invalid response from server");
     }
