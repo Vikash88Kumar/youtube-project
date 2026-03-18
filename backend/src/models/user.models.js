@@ -3,44 +3,100 @@ import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken"
 
-const userSchema=new mongoose.Schema(
-    {
-        username:{
-            type:String,
-            required:true,
-            unique:true
-        },
-        fullName:{
-            type:String,
-            required:true
-        },
-        email:{
-            type:String,
-            required:true,
-            unique:true
-        },
-        password:{
-            type:String,
-            required:true
-        },
-        avatar:{
-            type:String,
-            required :true
-        },
-        coverImage:{
-            type:String,
-            required:true
-        },
-        refreshToken:{
-            type:String
-        },
-        watchHistory:[{
-            type:Schema.Types.ObjectId,
-            ref:"Video"
-        }]
+// const userSchema=new mongoose.Schema(
+//     {
+//         username:{
+//             type:String,
+//             required:true,
+//             unique:true,
+//             lowercase:true,
+//             trim:true
+//         },
+//         email:{
+//             type:String,
+//             required:true,
+//             unique:true,
+//             lowercase:true,
+//             trim:true
+//         },
+//         fullName:{
+//             type:String,
+//             required:true
+//         },
+//         password:{
+//             type:String,
+//             required:true,
+//             minlength:6
+//         },
+//         avatar:{
+//             type:String,
+//             required :true
+//         },
+//         coverImage:{
+//             type:String,
+//             required:true
+//         },
+//         refreshToken:{
+//             type:String
+//         },
+//         watchHistory:[{
+//             type:Schema.Types.ObjectId,
+//             ref:"Video"
+//         }]
+//     },
+//     {timestamps:true}
+// )
+
+const userSchema = new mongoose.Schema(
+  {
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true
     },
-    {timestamps:true}
-)
+    fullName: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+      select: false
+    },
+    avatar: {
+      type: String,
+      required: true
+    },
+    coverImage: {
+      type: String,
+      default: ""
+    },
+    refreshToken: {
+      type: String,
+      select: false
+    },
+    watchHistory: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Video"
+      }
+    ]
+  },
+  { timestamps: true }
+);
+
+
 
 userSchema.plugin(mongooseAggregatePaginate)
 

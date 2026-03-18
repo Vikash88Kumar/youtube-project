@@ -11,7 +11,17 @@ router.route("/register").post(
     ]),
     registerUser
 );
-router.route("/login").post(loginUser)
+
+
+import rateLimit from "express-rate-limit"
+
+export const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: "Too many requests"
+})
+
+router.route("/login").post(loginLimiter,loginUser)
 router.route("/logout").post(verifyJwt,logout)
 router.route("/refresh-token").post(refreshAccessToken)
 

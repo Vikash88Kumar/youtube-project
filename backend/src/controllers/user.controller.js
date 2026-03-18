@@ -72,11 +72,12 @@ import mongoose from "mongoose";
         if([email,password].some(field=>field.trim()==="")){
             throw new ApiError(400,"All fields are required");
         }
-        const user=await User.findOne({
-            $or:[{email}]
-        })
+        const user=await User.findOne({email}).select("+password")
         if(!user){
             throw new ApiError(403,"User Not Exists")
+        }
+        if (!user.password) {
+        throw new ApiError(500, "Password not fetched from DB");
         }
         if(!user.isPasswordCorrect(password)){
             throw new ApiError(404,"Password is incorrect");
@@ -89,9 +90,10 @@ import mongoose from "mongoose";
 
         const options={
             httpOnly:true,
-            secure:true,
-            sameSite: "none",
-                path: "/",
+            secure:false,
+            // sameSite: "none",
+            //     path: "/",
+             sameSite: "lax",
         }
         res.status(200)
         .cookie("accessToken",accessToken,options)
