@@ -90,10 +90,8 @@ import mongoose from "mongoose";
 
         const options={
             httpOnly:true,
-            secure:false,
-            // sameSite: "none",
-            //     path: "/",
-             sameSite: "lax",
+            secure:true,
+            sameSite: "none"
         }
         res.status(200)
         .cookie("accessToken",accessToken,options)
@@ -266,7 +264,8 @@ import mongoose from "mongoose";
     
         const options = {
             httpOnly: true,
-            secure: true
+            secure: true,
+            sameSite: "none"
         }
     
         const {accessToken, newRefreshToken} = await generateAccessRefreshToken(user)
