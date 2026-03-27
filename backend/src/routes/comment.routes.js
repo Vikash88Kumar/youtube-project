@@ -11,7 +11,7 @@ import verifyJwt from "../middlewares/auth.middleware.js"
 
 const router = Router();
 
-router.use(verifyJwt); // Apply verifyJWT middleware to all routes in this file
+// router.use(verifyJwt); // Apply verifyJWT middleware to all routes in this file
 
 router.route("/:videoId").get(getVideoComments).post(addVideoComment);
 router.route("/t/:tweetId").get(getTweetComments).post(addTweetComment)
