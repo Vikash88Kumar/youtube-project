@@ -12,7 +12,7 @@ import {upload} from "../middlewares/multer.middleware.js"
 import { addVideoTowatchHistory, getWatchHistory, removeWatchHistory } from '../controllers/watchhistory.controller.js';
 
 const router = Router();
-// router.use(verifyJwt); // Apply verifyJWT middleware to all routes in this file
+router.use(verifyJwt); // Apply verifyJWT middleware to all routes in this file
 
 router
     .route("/")
