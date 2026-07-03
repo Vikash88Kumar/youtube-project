@@ -1,6 +1,16 @@
 {
-  "name": "YouTube Clone",
-  "short_name": "YouTube",
+  "id": "/",
+  "name": "VidChat Clone",
+  "short_name": "VidChat",
+  "description": "A YouTube-inspired video streaming and social platform.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#111827",
+  "background_color": "#111827",
+  "lang": "en",
+
   "icons": [
     {
       "src": "/pwa-192x192.png",
@@ -13,8 +23,24 @@
       "type": "image/png"
     }
   ],
-   "theme_color": "#111827",
-  "background_color": "#111827",
-  "display": "standalone",
-  "start_url": "/"
+
+  "categories": [
+    "social",
+    "entertainment",
+    "video"
+  ],
+  "screenshots": [
+    {
+        "src": "/screenshot-mobile.png",
+        "sizes": "720x1280",
+        "type": "image/jpeg",
+        "form_factor": "narrow"
+    },
+    {
+        "src": "/screenshot-desktop.png",
+        "sizes": "1366x768",
+        "type": "image/png",
+        "form_factor": "wide"
+    }
+    ]
 }
