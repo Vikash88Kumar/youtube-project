@@ -7,6 +7,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import {login} from "../contextapi/authSlice.js"
 import { LoginUser,getCurrentUser } from "../services/user.api";
+import { requestNotificationPermission } from "../utils/firebase.js";
 import { useDispatch } from "react-redux";
 
 const Login = () => {
@@ -44,7 +45,14 @@ const handleSubmit = async (e) => {
   setLoading(true);
 
   try {
-    const loginRes = await LoginUser({ email, password });
+    let fcmToken = "";
+    try {
+      fcmToken = await requestNotificationPermission() || "";
+    } catch (err) {
+      console.warn("FCM token failed", err);
+    }
+    
+    const loginRes = await LoginUser({ email, password, fcmToken });
     console.log(loginRes)
     const user = loginRes.data?.user;
     if (!user) {

@@ -4,7 +4,7 @@ import { Subscription } from "../models/subscription.models.js"
 import {ApiError} from "../utils/apiError.js"
 import {ApiResponse} from "../utils/apiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
-
+import { sendNotificationEvent } from "../utils/notification.js"
 
 const toggleSubscription = asyncHandler(async (req, res) => {
         const {channelId} = req.params
@@ -20,6 +20,15 @@ const toggleSubscription = asyncHandler(async (req, res) => {
     }else{
         await Subscription.create({channel:channelId,subscriber:req.user._id})
         subscribed=true
+
+        // Notify channel owner
+        await sendNotificationEvent({
+            userId: channelId,
+            eventType: "new_subscriber",
+            payload: {
+                item: `${req.user.fullName} subscribed to your channel!`
+            }
+        });
     }
     const subscribersCount=await Subscription.countDocuments({channel:channelId})
     return res.status(200).json(new ApiResponse(200,{subscribed,subscribersCount},"subscription toggle successful"))

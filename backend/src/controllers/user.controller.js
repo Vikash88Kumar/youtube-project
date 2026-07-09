@@ -5,6 +5,7 @@ import {ApiResponse} from "../utils/apiResponse.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import { sendNotificationEvent } from "../utils/notification.js";
 
     const generateAccessRefreshToken=async(user)=>{   
         try {
@@ -22,7 +23,7 @@ import mongoose from "mongoose";
     }
     const registerUser=asyncHandler(async(req,res)=>{
 
-        const {username,email,fullName,password}=req.body;
+        const {username,email,fullName,password,fcmToken}=req.body;
         if([username,email,fullName,password].some(field=>
             field?.trim()===""
         )){
@@ -55,7 +56,8 @@ import mongoose from "mongoose";
             password,
             avatar:avatar.secure_url,
             coverImage:coverImage.secure_url || "",
-            refreshToken:""
+            refreshToken:"",
+            fcmToken: fcmToken || ""
         })
 
         const createdUser = await User.findById(user._id).select("-password -refreshToken");
@@ -63,12 +65,23 @@ import mongoose from "mongoose";
             throw new ApiError(500, "Unable to create user");
         }
 
+        // Send welcome notification
+        await sendNotificationEvent({
+            userId: user._id,
+            eventType: "welcome",
+            email: email,
+            payload: {
+                item: `Welcome to YouTube, ${fullName}! We are excited to have you.`
+            },
+            channels: ["email"] 
+        });
+
         return res.status(200).json(
             new ApiResponse(200,createdUser,"User Register Successsfully")
         )
     })
     const loginUser=asyncHandler(async(req,res)=>{
-        const {email,password}=req.body;
+        const {email,password,fcmToken}=req.body;
         if([email,password].some(field=>field.trim()==="")){
             throw new ApiError(400,"All fields are required");
         }
@@ -82,6 +95,12 @@ import mongoose from "mongoose";
         if(!user.isPasswordCorrect(password)){
             throw new ApiError(404,"Password is incorrect");
         }
+
+        if (fcmToken) {
+            user.fcmToken = fcmToken;
+            await user.save({validateBeforeSave: false});
+        }
+
         const {accessToken,refreshToken}= await generateAccessRefreshToken(user)
 
         const loggenInuser = user.toObject();

@@ -6,6 +6,7 @@ import { Tweet } from "../models/tweet.models.js"
 import {ApiError} from "../utils/apiError.js"
 import {ApiResponse} from "../utils/apiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
+import { sendNotificationEvent } from "../utils/notification.js"
 
 const toggleVideoLike = asyncHandler(async (req, res) => {
     const {videoId} = req.params
@@ -27,6 +28,16 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
     }else{
         await Like.create({likedBy:req.user._id,video:videoId})
         liked=true
+
+        if (String(video.owner) !== String(req.user._id)) {
+            await sendNotificationEvent({
+                userId: video.owner,
+                eventType: "new_like",
+                payload: {
+                    item: `${req.user.fullName} liked your video.`
+                }
+            });
+        }
     }
     const likeCount = await Like.countDocuments({ video: videoId });
 

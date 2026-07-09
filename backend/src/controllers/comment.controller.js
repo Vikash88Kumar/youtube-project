@@ -4,6 +4,9 @@ import {ApiError} from "../utils/apiError.js"
 import {ApiResponse} from "../utils/apiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
 import { Like } from "../models/like.models.js"
+import { Video } from "../models/video.models.js"
+import { Tweet } from "../models/tweet.models.js"
+import { sendNotificationEvent } from "../utils/notification.js"
 
 const getVideoComments = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
@@ -181,6 +184,17 @@ const addTweetComment = asyncHandler(async (req, res) => {
     owner: req.user._id,
   });
 
+  const tweet = await Tweet.findById(tweetId);
+  if (tweet && String(tweet.owner) !== String(req.user._id)) {
+      await sendNotificationEvent({
+          userId: tweet.owner,
+          eventType: "new_comment",
+          payload: {
+              item: `${req.user.fullName} commented on your tweet: "${content}"`
+          }
+      });
+  }
+
   // 2️⃣ Populate owner (🔥 MOST IMPORTANT FIX)
   const populatedComment = await Comment.findById(comment._id)
     .populate("owner", "username fullName avatar");
@@ -217,6 +231,18 @@ const addVideoComment = asyncHandler(async (req, res) => {
         video:videoId,
         owner:req.user._id
     })
+
+    const video = await Video.findById(videoId);
+    if (video && String(video.owner) !== String(req.user._id)) {
+        await sendNotificationEvent({
+            userId: video.owner,
+            eventType: "new_comment",
+            payload: {
+                item: `${req.user.fullName} commented on your video: "${content}"`
+            }
+        });
+    }
+
     return res.status(200).json(
         new ApiResponse(200,comment,"Comments added successfully")
     )

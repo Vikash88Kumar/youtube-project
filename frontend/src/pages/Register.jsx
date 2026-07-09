@@ -5,6 +5,8 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { registerUser } from "../services/user.api";
+import { requestNotificationPermission } from "../utils/firebase.js";
+
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate=useNavigate()
@@ -54,6 +56,16 @@ const handleSubmit = async(e) => {
     if (formData.coverImage) {
       data.append("coverImage", formData.coverImage);
     }
+    
+    try {
+      const fcmToken = await requestNotificationPermission();
+      if (fcmToken) {
+        data.append("fcmToken", fcmToken);
+      }
+    } catch (err) {
+      console.warn("FCM token failed", err);
+    }
+
     const res=await registerUser(data)
     
     alert("register successfull now you can login")

@@ -86,6 +86,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       select: false
     },
+    fcmToken: {
+      type: String,
+      default: ""
+    },
     watchHistory: [
       {
         type: Schema.Types.ObjectId,
