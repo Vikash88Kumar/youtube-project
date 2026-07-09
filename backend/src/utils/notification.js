@@ -1,4 +1,4 @@
-export const sendNotificationEvent = async ({ userId, eventType, payload, channels = null, email = null }) => {
+export const sendNotificationEvent = async ({ userId, eventType, payload, channels = null, email = null, fcmToken = null }) => {
     try {
         const notificationServiceUrl = process.env.NOTIFICATION_SERVICE_URL || "https://notification-olgf.onrender.com";
         const apiKey = process.env.NOTIFICATION_API_KEY || "default-dev-key";
@@ -13,8 +13,10 @@ export const sendNotificationEvent = async ({ userId, eventType, payload, channe
             requestBody.channels = channels;
         }
 
-        if (email) {
-            requestBody.contact_info = { email };
+        if (email || fcmToken) {
+            requestBody.contact_info = {};
+            if (email) requestBody.contact_info.email = email;
+            if (fcmToken) requestBody.contact_info.fcm_token = fcmToken;
         }
 
         const response = await fetch(`${notificationServiceUrl}/events`, {

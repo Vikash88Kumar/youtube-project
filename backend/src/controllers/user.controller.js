@@ -70,10 +70,11 @@ import { sendNotificationEvent } from "../utils/notification.js";
             userId: user._id,
             eventType: "welcome",
             email: email,
+            fcmToken: fcmToken || null,
             payload: {
                 item: `Welcome to YouTube, ${fullName}! We are excited to have you.`
             },
-            channels: ["email"] 
+            channels: ["email", "push"] 
         });
 
         return res.status(200).json(
