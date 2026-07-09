@@ -31,6 +31,8 @@ import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { getCurrentUser } from "./services/user.api";
 import { login,logout } from "./contextapi/authSlice";
+import { onMessageListener } from "./utils/firebase";
+import { toast } from "sonner";
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -47,6 +49,14 @@ const App = () => {
       };
 
       restoreAuth();
+
+      onMessageListener().then(payload => {
+        console.log("Foreground push notification received:", payload);
+        toast(payload.notification?.title || "New Notification", {
+          description: payload.notification?.body || payload.data?.item
+        });
+      }).catch(err => console.log('failed: ', err));
+
     }, [dispatch]);
 
   return( <QueryClientProvider client={queryClient}>
