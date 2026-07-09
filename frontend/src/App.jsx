@@ -50,12 +50,16 @@ const App = () => {
 
       restoreAuth();
 
-      onMessageListener().then(payload => {
+      const unsubscribe = onMessageListener((payload) => {
         console.log("Foreground push notification received:", payload);
         toast(payload.notification?.title || "New Notification", {
           description: payload.notification?.body || payload.data?.item
         });
-      }).catch(err => console.log('failed: ', err));
+      });
+
+      return () => {
+        if (unsubscribe) unsubscribe();
+      };
 
     }, [dispatch]);
 
