@@ -21,7 +21,7 @@ class NotificationClient {
    */
   async registerUser(userId, email, fcmToken) {
     try {
-      await this.api.post(`/users/${userId}/token`, {
+      await this.api.post(`/users/${String(userId)}/token`, {
         email: email,
         fcm_token: fcmToken
       });
@@ -37,7 +37,7 @@ class NotificationClient {
   async sendEvent(userId, eventType, message, channels = ["push", "email", "inapp"], forceDelivery = false) {
     try {
       const response = await this.api.post('/events', {
-        user_id: userId,
+        user_id: String(userId),
         event_type: eventType,
         payload: {
           item: message
