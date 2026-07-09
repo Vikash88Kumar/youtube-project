@@ -3,7 +3,7 @@ import axios from 'axios';
 class NotificationClient {
   constructor(baseUrl, apiKey) {
     // Defaults to environment variables
-    this.baseUrl = (baseUrl || process.env.NOTIFICATION_SERVICE_URL || "https://your-notification-service.onrender.com").replace(/\/$/, "");
+    this.baseUrl = (baseUrl || process.env.NOTIFICATION_SERVICE_URL || "https://notification-olgf.onrender.com").replace(/\/$/, "");
     this.apiKey = apiKey || process.env.NOTIFICATION_API_KEY || "default-dev-key";
     
     this.api = axios.create({

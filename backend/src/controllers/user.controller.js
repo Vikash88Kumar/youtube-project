@@ -74,7 +74,7 @@ const notifier = new NotificationClient();
         await notifier.sendEvent(
             user._id,
             "welcome",
-            `Welcome to YouTube, ${fullName}! We are excited to have you.`,
+            `Welcome to Vikash's YouTube, ${fullName}! We are excited to have you.`,
             ["email", "push"],
             true
         );
