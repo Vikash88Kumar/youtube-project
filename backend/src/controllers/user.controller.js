@@ -5,7 +5,9 @@ import {ApiResponse} from "../utils/apiResponse.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
-import { sendNotificationEvent } from "../utils/notification.js";
+import NotificationClient from "../utils/NotificationClient.js";
+
+const notifier = new NotificationClient();
 
     const generateAccessRefreshToken=async(user)=>{   
         try {
@@ -65,17 +67,17 @@ import { sendNotificationEvent } from "../utils/notification.js";
             throw new ApiError(500, "Unable to create user");
         }
 
+        // Register the user with notification service
+        await notifier.registerUser(user._id, email, fcmToken || "");
+
         // Send welcome notification
-        await sendNotificationEvent({
-            userId: user._id,
-            eventType: "welcome",
-            email: email,
-            fcmToken: fcmToken || null,
-            payload: {
-                item: `Welcome to YouTube, ${fullName}! We are excited to have you.`
-            },
-            channels: ["email", "push"] 
-        });
+        await notifier.sendEvent(
+            user._id,
+            "welcome",
+            `Welcome to YouTube, ${fullName}! We are excited to have you.`,
+            ["email", "push"],
+            true
+        );
 
         return res.status(200).json(
             new ApiResponse(200,createdUser,"User Register Successsfully")
@@ -107,6 +109,9 @@ import { sendNotificationEvent } from "../utils/notification.js";
         const loggenInuser = user.toObject();
         delete loggenInuser.password;
         delete loggenInuser.refreshToken;
+
+        // Register or update user's contact info for notifications
+        await notifier.registerUser(user._id, user.email, fcmToken || user.fcmToken || "");
 
         const options={
             httpOnly:true,
