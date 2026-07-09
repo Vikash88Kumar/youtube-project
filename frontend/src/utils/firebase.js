@@ -20,7 +20,7 @@ export const requestNotificationPermission = async () => {
     if (permission === "granted") {
       // TODO: Replace with your VAPID key from Firebase Console -> Project Settings -> Cloud Messaging
       const token = await getToken(messaging, { 
-        vapidKey: "BA6CZ5D9U-OB9PAlrc7RjIkdDQHjWrype-_sAZUhBZK32lau5GA8LW_uKsKew3YMFLZlFCb5wBxqtzGcwaIzymY" 
+        vapidKey: "BOD9Oht76aIyaWRKaayCVZOEGpiq0YZkFSIMAoFCkNmnwTFrQSRMmOfkfEPiVdPBTAlgXrFhTBsqE7GajUbGhmk" 
       });
       return token;
     }
