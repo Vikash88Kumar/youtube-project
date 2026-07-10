@@ -6,7 +6,9 @@ import {asyncHandler} from "../utils/asyncHandler.js"
 import { Like } from "../models/like.models.js"
 import { Video } from "../models/video.models.js"
 import { Tweet } from "../models/tweet.models.js"
-import { sendNotificationEvent } from "../utils/notification.js"
+import NotificationClient from "../utils/NotificationClient.js"
+
+const notifier = new NotificationClient();
 
 const getVideoComments = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
@@ -186,13 +188,15 @@ const addTweetComment = asyncHandler(async (req, res) => {
 
   const tweet = await Tweet.findById(tweetId);
   if (tweet && String(tweet.owner) !== String(req.user._id)) {
-      await sendNotificationEvent({
-          userId: tweet.owner,
-          eventType: "new_comment",
-          payload: {
-              item: `${req.user.fullName} commented on your tweet: "${content}"`
-          }
-      });
+      await notifier.sendEvent(
+          tweet.owner,
+          "comment",
+          `${req.user.fullName} commented on your tweet: "${content}"`,
+          ["push", "email", "inapp"],
+          false,
+          `/watch?v=${tweetId}`, // Assuming actionUrl
+          req.user._id
+      );
   }
 
   // 2️⃣ Populate owner (🔥 MOST IMPORTANT FIX)
@@ -234,13 +238,15 @@ const addVideoComment = asyncHandler(async (req, res) => {
 
     const video = await Video.findById(videoId);
     if (video && String(video.owner) !== String(req.user._id)) {
-        await sendNotificationEvent({
-            userId: video.owner,
-            eventType: "new_comment",
-            payload: {
-                item: `${req.user.fullName} commented on your video: "${content}"`
-            }
-        });
+        await notifier.sendEvent(
+            video.owner,
+            "comment",
+            `${req.user.fullName} commented on your video: "${content}"`,
+            ["push", "email", "inapp"],
+            false,
+            `/watch?v=${videoId}`,
+            req.user._id
+        );
     }
 
     return res.status(200).json(

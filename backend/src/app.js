@@ -33,6 +33,7 @@ import playlistRouter from "./routes/playlist.routes.js"
 import dashboardRouter from "./routes/dashboard.routes.js"
 import chatRouter from "./routes/chat.routes.js"
 import historyRouter from "./routes/watchHIstory.routes.js"
+import notificationRouter from "./routes/notification.routes.js"
 //routes declare
 app.use("/api/v1/check", checkRouter)
 app.use("/api/v1/users", userRouter)
@@ -45,5 +46,6 @@ app.use("/api/v1/likes", likeRouter)
 app.use("/api/v1/playlist", playlistRouter)
 app.use("/api/v1/dashboard", dashboardRouter)
 app.use("/api/v1/history",historyRouter)
+app.use("/api/v1/notifications", notificationRouter)
 
 export {app}

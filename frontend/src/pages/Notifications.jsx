@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import {
@@ -18,59 +20,8 @@ import {
   TabsList,
   TabsTrigger,
 } from "../components/ui/tabs";
-
-const notifications = [
-  {
-    id: "1",
-    type: "like",
-    user: "Sarah Johnson",
-    avatar:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
-    action: "liked your video",
-    target: "Building a Modern Web App with React",
-    thumbnail:
-      "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=120&h=68&fit=crop",
-    time: "2 minutes ago",
-    read: false,
-  },
-  {
-    id: "2",
-    type: "comment",
-    user: "Alex Chen",
-    avatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
-    action: "commented on your video",
-    target: "This is amazing content! Keep it up 🔥",
-    thumbnail:
-      "https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=120&h=68&fit=crop",
-    time: "15 minutes ago",
-    read: false,
-  },
-  {
-    id: "3",
-    type: "subscriber",
-    user: "Tech Enthusiast",
-    avatar:
-      "https://images.unsplash.com/photo-1599566150163-29194dcabd36?w=100&h=100&fit=crop",
-    action: "subscribed to your channel",
-    target: null,
-    thumbnail: null,
-    time: "1 hour ago",
-    read: false,
-  },
-  {
-    id: "4",
-    type: "like",
-    user: "Maria Garcia",
-    avatar:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
-    action: "liked your comment",
-    target: "Great explanation of TypeScript generics!",
-    thumbnail: null,
-    time: "2 hours ago",
-    read: true,
-  },
-];
+import { getNotifications, markAllNotificationsRead } from "../services/notification.api";
+import { formatDistanceToNow } from "date-fns";
 
 const getIcon = (type) => {
   switch (type) {
@@ -80,7 +31,7 @@ const getIcon = (type) => {
       return <MessageCircle className="h-4 w-4 text-primary" />;
     case "subscriber":
       return <UserPlus className="h-4 w-4 text-green-500" />;
-    case "upload":
+    case "welcome":
       return <Play className="h-4 w-4 text-primary fill-primary" />;
     default:
       return <Bell className="h-4 w-4" />;
@@ -90,14 +41,32 @@ const getIcon = (type) => {
 export default function Notifications() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("notifications");
-  const [notificationsList, setNotificationsList] = useState(notifications);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const unreadCount = notificationsList.filter((n) => !n.read).length;
+  const { data: notificationsData, isLoading } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: () => getNotifications()
+  });
 
-  const markAllAsRead = () => {
-    setNotificationsList(
-      notificationsList.map((n) => ({ ...n, read: true }))
-    );
+  const markAllReadMutation = useMutation({
+    mutationFn: markAllNotificationsRead,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["notifications"]);
+    }
+  });
+
+  const notificationsList = notificationsData?.data?.data?.notifications || [];
+  const unreadCount = notificationsList.filter((n) => !n.isRead).length;
+
+  const handleMarkAllAsRead = () => {
+    markAllReadMutation.mutate();
+  };
+
+  const handleNotificationClick = (notification) => {
+    if (notification.actionUrl) {
+      navigate(notification.actionUrl);
+    }
   };
 
   const filterByType = (type) => {
@@ -130,7 +99,7 @@ export default function Notifications() {
                 )}
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={markAllAsRead}>
+                <Button variant="outline" size="sm" onClick={handleMarkAllAsRead} disabled={markAllReadMutation.isPending || unreadCount === 0}>
                   <Check className="h-4 w-4 mr-2" />
                   Mark all read
                 </Button>
@@ -147,57 +116,44 @@ export default function Notifications() {
                 <TabsTrigger value="like">Likes</TabsTrigger>
                 <TabsTrigger value="comment">Comments</TabsTrigger>
                 <TabsTrigger value="subscriber">Subscribers</TabsTrigger>
-                <TabsTrigger value="upload">Uploads</TabsTrigger>
+                <TabsTrigger value="welcome">Welcome</TabsTrigger>
               </TabsList>
 
-              {["all", "like", "comment", "subscriber", "upload"].map(
+              {["all", "like", "comment", "subscriber", "welcome"].map(
                 (tab) => (
                   <TabsContent key={tab} value={tab} className="mt-4">
                     <div className="space-y-2">
-                      {filterByType(tab).map((notification) => (
+                      {isLoading ? (
+                        <p className="text-muted-foreground text-center py-4">Loading notifications...</p>
+                      ) : filterByType(tab).length === 0 ? (
+                        <p className="text-muted-foreground text-center py-4">No notifications found.</p>
+                      ) : filterByType(tab).map((notification) => (
                         <div
-                          key={notification.id}
+                          key={notification._id}
+                          onClick={() => handleNotificationClick(notification)}
                           className={`flex items-start gap-4 p-4 rounded-xl cursor-pointer transition-colors hover:bg-secondary/50 ${
-                            !notification.read
+                            !notification.isRead
                               ? "bg-primary/5 border-l-4 border-primary"
                               : ""
                           }`}
                         >
                           <Avatar className="h-12 w-12">
-                            <AvatarImage src={notification.avatar} />
+                            <AvatarImage src={notification.sender?.avatar} />
                             <AvatarFallback>
-                              {notification.user[0]}
+                              {notification.sender?.fullName?.[0] || getIcon(notification.type)}
                             </AvatarFallback>
                           </Avatar>
 
                           <div className="flex-1">
                             <p className="text-sm">
-                              <span className="font-semibold">
-                                {notification.user}
-                              </span>{" "}
-                              <span className="text-muted-foreground">
-                                {notification.action}
-                              </span>
+                              {notification.message}
                             </p>
-                            {notification.target && (
-                              <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
-                                {notification.target}
-                              </p>
-                            )}
                             <p className="text-xs text-muted-foreground mt-1">
-                              {notification.time}
+                              {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
                             </p>
                           </div>
 
-                          {notification.thumbnail && (
-                            <img
-                              src={notification.thumbnail}
-                              alt=""
-                              className="w-24 h-14 rounded-lg object-cover"
-                            />
-                          )}
-
-                          {!notification.read && (
+                          {!notification.isRead && (
                             <span className="w-2 h-2 rounded-full bg-primary mt-2" />
                           )}
                         </div>

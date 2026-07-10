@@ -53,15 +53,27 @@ const App = () => {
       const unsubscribe = onMessageListener((payload) => {
         console.log("Foreground push notification received:", payload);
         toast(payload.notification?.title || "New Notification", {
-          description: payload.notification?.body || payload.data?.item
+          description: payload.notification?.body || payload.data?.item,
+          action: {
+            label: 'View',
+            onClick: () => {
+              if (payload.data?.actionUrl) {
+                window.location.href = payload.data.actionUrl;
+              } else {
+                window.location.href = '/notifications';
+              }
+            }
+          }
         });
+        // Invalidate notifications query so the UI updates
+        queryClient.invalidateQueries(["notifications"]);
       });
 
       return () => {
         if (unsubscribe) unsubscribe();
       };
 
-    }, [dispatch]);
+    }, [dispatch, queryClient]);
 
   return( <QueryClientProvider client={queryClient}>
     <TooltipProvider>
