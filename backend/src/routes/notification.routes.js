@@ -4,7 +4,7 @@ import verifyJwt from "../middlewares/auth.middleware.js"
 
 const router = Router();
 
-router.use(verifyJWT); // Protect all routes
+router.use(verifyJwt); // Protect all routes
 
 router.route("/").get(getUserNotifications);
 router.route("/mark-all-read").patch(markAllAsRead);
